@@ -7,12 +7,19 @@
 Node::Node() {
 }
 
-Node::Node(int key, int priority, bool leaf) {
+Node::Node(int key, bool leaf) {
     this->key = key;
-    this->priority = priority;
     this->leaf = leaf;
-    left = NULL;
-    right = NULL;
+    left = nullptr;
+    right = nullptr;
+}
+
+
+Node::Node(int key, Node *left, Node *right) {
+    this->key = key;
+    leaf = false;
+    this->left = left;
+    this->right = right;
 }
 
 Node::~Node() {
@@ -30,14 +37,26 @@ void Node::setRight(Node *right) {
     this->right = right;
 }
 
-int32_t Node::getPriority() {
-    return priority;
-}
-
 Node *Node::getLeft() {
     return left;
 }
 
 Node *Node::getRight() {
     return right;
+}
+
+int32_t Node::getKey() {
+    return key;
+}
+
+void Node::setKey(int32_t key) {
+    this->key = key;
+}
+
+Node *Node::getParent() {
+    return parent;
+}
+
+void Node::setParent(Node *ptr) {
+    parent = ptr;
 }

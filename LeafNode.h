@@ -14,23 +14,25 @@
 class LeafNode : public Node
 {
 private:
-    void *parent; // pointer to parent node
-    int numKeys ; // number of keys in this node
-    int leafkey[FANOUT-1]; // the values in this node
-    void *ptr[FANOUT]; // pointers to child nodes or data if this is a leaf node
+    int32_t numKeys ; // number of keys in this node
+    int32_t leafKey[FANOUT]; // the values in this node
+    void *ptr[FANOUT]; // pointers to data
+    LeafNode *prev;
+    LeafNode *next;
 
 public:
     LeafNode();
     ~LeafNode();
     int getNumKeys();
-    int getKey(int index);
-    void* getPtr(int index);
-    void* getParent();
-    void* getNextLeaf();
+    int getLeafKey(int index);
+    void *getPtr(int index);
+    LeafNode *getNextLeaf();
+    LeafNode *getPrevLeaf();
     int getIndex(void* value);
-    void setParent(void* parent);
-    void setNextLeaf(void* value);
-    void setPtr(int index, void* value);
+    int getIndex(int key);
+    void setNextLeaf(LeafNode *ptr);
+    void setPrevleaf(LeafNode *ptr);
+    void setPtr(int index, void *value);
     void setKey(int index, int key);
     void remove(int index);
     void insert(int key, void *value);
