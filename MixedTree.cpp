@@ -11,13 +11,8 @@ MixedTree::~MixedTree() {
 void MixedTree::split(LeafNode *node) {
     Node *grandparent = node->getParent();
     LeafNode *a = new LeafNode();
-    for (int i = node->getNumKeys()/2; i >= 0; i--) {
-        a->insert(node->getLeafKey(i), node->getPtr(i));
-    }
     LeafNode *b = new LeafNode();
-    for (int i = node->getNumKeys()-1; i > node->getNumKeys()/2; i--) {
-        b->insert(node->getLeafKey(i), node->getPtr(i));
-    }
+    node->split(a, b);
     Node *parent = new Node(b->getKey(), a, b);
     parent->setParent(grandparent);
     a->setParent(parent);
@@ -31,8 +26,13 @@ void MixedTree::split(LeafNode *node) {
 
 }
 
-void MixedTree::merge(Node *node, Node *left, Node *right) {
-
+void MixedTree::merge(Node *left, Node *right) {
+    LeafNode *l = static_cast<LeafNode*>(left);
+    LeafNode *r = static_cast<LeafNode*>(right);
+    // check if merge is possible
+    if (l->getSize() + r->getSize() > FANOUT/2 + FANOUT%2) return;
+    LeafNode *node = new LeafNode();
+    
 }
 
 LeafNode *MixedTree::searchLeafNode(int key) {
@@ -54,7 +54,10 @@ void MixedTree::remove(int key) {
     LeafNode *node = searchLeafNode(key);
     node->remove(node->getIndex(key));
     // TODO: merge if empty
-
+    if (node->getParent()->getLeft()->isLeaf() &&
+            node->getParent()->getRight()->isLeaf()) {
+        merge(node->getParent()->getLeft(), node->getParent()->getRight());
+    }
 }
 
 void *MixedTree::search(int key) {

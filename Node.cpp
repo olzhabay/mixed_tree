@@ -1,7 +1,3 @@
-//
-// Created by olzhas on 7/4/17.
-//
-
 #include "Node.h"
 
 Node::Node() {
@@ -12,6 +8,7 @@ Node::Node(int key, bool leaf) {
     this->leaf = leaf;
     left = nullptr;
     right = nullptr;
+    parent = nullptr;
 }
 
 

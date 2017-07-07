@@ -1,20 +1,11 @@
-/**
- *
- *      TreeNode Class
- *
- */
-
-#include <malloc.h>
+#include <algorithm>
 #include "LeafNode.h"
 
 // Constructor
 LeafNode::LeafNode() : Node(0, true) {
-    this->numKeys = 0;
-    for (int i = 0; i < FANOUT-1; i++) {
-        leafKey[i] = 0;
-        ptr[i] = NULL;
-    }
-    ptr[FANOUT-1] = NULL;
+    this->size = 0;
+    prev = nullptr;
+    next = nullptr;
 }
 
 // Destructor
@@ -22,18 +13,18 @@ LeafNode::~LeafNode() {
 }
 
 // Returns node's number of keys
-int LeafNode::getNumKeys() {
-    return numKeys;
+int LeafNode::getSize() {
+    return size;
 }
 
 // Returns node's key
 int LeafNode::getLeafKey(int index) {
-    return leafKey[index];
+    return storage[index].key;
 }
 
 // Returns node's pointer
 void *LeafNode::getPtr(int index) {
-    return ptr[index];
+    return storage[index].ptr;
 }
 
 LeafNode *LeafNode::getNextLeaf() {
@@ -47,31 +38,28 @@ LeafNode *LeafNode::getPrevLeaf() {
 //
 int LeafNode::getIndex(void *value) {
     int index = 0;
-    while (value != ptr[index] && index < numKeys)
-        index++;
-    return index;
+    while (index < FANOUT && (value != storage[index].ptr || !storage[index].valid)) index++;
+    return index == FANOUT ? -1 : index;
 }
 
+// get index with given key
 int LeafNode::getIndex(int key) {
     int index = 0;
-    while (key != leafKey[index] && index < numKeys)
+    while (index < FANOUT && (key != storage[index].key || !storage[index].valid)) index++;
+    return index == FANOUT ? -1 : index;
+
+    /*
+    int index = 0;
+    while (key != leafKey[index] && index < size)
         index++;
     return index;
+     */
 }
 
 
 // Checks whether node is full or not
 bool LeafNode::isFull() {
-    return FANOUT-1 == numKeys;
-}
-
-void LeafNode::setPtr(int index, void *value) {
-    this->ptr[index] = value;
-}
-
-//
-void LeafNode::setKey(int index, int key) {
-    this->leafKey[index] = key;
+    return FANOUT == size;
 }
 
 void LeafNode::setNextLeaf(LeafNode *ptr) {
@@ -84,21 +72,41 @@ void LeafNode::setPrevleaf(LeafNode *ptr) {
 
 // Deletes key and pointer from leaf node (key)
 // TODO: atomicity
+// Mark spot not valid
 void LeafNode::remove(int index) {
-	if (index >= numKeys) return;
-	for (int i = index; i < numKeys-1; i++) {
+    storage[index].valid = false;
+    size--;
+
+    /*
+	if (index >= size) return;
+	for (int i = index; i < size-1; i++) {
 		leafKey[i] = leafKey[i+1];
 		ptr[i] = ptr[i+1];
 	}
-	numKeys--;
-	leafKey[numKeys] = 0;
-	ptr[numKeys] = NULL;
+	size--;
+	leafKey[size] = 0;
+	ptr[size] = NULL;
+     */
 }
 
 // Inserts data with pointer v and key k into the leaf node
 // TODO: requires atomicity
+// Insert into empty spot
 void LeafNode::insert(int key, void *value) {
-	int i = numKeys-1;
+
+    int index = 0;
+    while (storage[index].valid) index++;
+    storage[index].key = key;
+    storage[index].ptr = value;
+    storage[index].valid = true;
+    size++;
+
+    if (getKey() > key) {
+        setKey(key);
+    }
+
+    /*
+	int i = size-1;
 	while (i >= 0 && key < this->leafKey[i]) {
 		this->ptr[i+1] = this->ptr[i];
 		this->leafKey[i+1] = this->leafKey[i];
@@ -106,8 +114,26 @@ void LeafNode::insert(int key, void *value) {
 	}
 	this->leafKey[i+1] = key;
 	this->ptr[i+1] = value;
-	numKeys++;
+	size++;
     if (Node::getKey() != leafKey[0]) {
         Node::setKey(leafKey[0]);
     }
+    */
+}
+
+void LeafNode::split(LeafNode *a, LeafNode *b) {
+    sort();
+    for (int i = size/2; i >= 0; i--) {
+        a->insert(storage[i].key, storage[i].ptr);
+    }
+    for (int i = size-1; i > size/2; i--) {
+        b->insert(storage[i].key, storage[i].ptr);
+    }
+
+}
+
+void LeafNode::sort() {
+    std::sort(storage, storage+size, [](const kvStore &v1, const kvStore &v2) -> bool {
+        return v1.key > v2.key;
+    });
 }

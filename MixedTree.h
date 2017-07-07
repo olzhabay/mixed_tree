@@ -7,7 +7,7 @@ class MixedTree {
 private:
     Node* root;
     void split(LeafNode *node);
-    void merge(Node *node, Node *left, Node *right);
+    void merge(Node *left, Node *right);
     LeafNode* searchLeafNode(int key);
 public:
     MixedTree();
