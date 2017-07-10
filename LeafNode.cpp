@@ -13,7 +13,7 @@ LeafNode::~LeafNode() {
 }
 
 // Returns node's number of keys
-int LeafNode::getSize() {
+int LeafNode::getTotalSize() {
     return size;
 }
 
@@ -38,14 +38,16 @@ LeafNode *LeafNode::getPrevLeaf() {
 //
 int LeafNode::getIndex(void *value) {
     int index = 0;
-    while (index < FANOUT && (value != storage[index].ptr || !storage[index].valid)) index++;
+    while (index < FANOUT && (value != storage[index].ptr || !storage[index].valid))
+        index++;
     return index == FANOUT ? -1 : index;
 }
 
 // get index with given key
 int LeafNode::getIndex(int key) {
     int index = 0;
-    while (index < FANOUT && (key != storage[index].key || !storage[index].valid)) index++;
+    while (index < FANOUT && (key != storage[index].key || !storage[index].valid))
+        index++;
     return index == FANOUT ? -1 : index;
 
     /*
@@ -75,7 +77,7 @@ void LeafNode::setPrevleaf(LeafNode *ptr) {
 // Mark spot not valid
 void LeafNode::remove(int index) {
     storage[index].valid = false;
-    size--;
+    vsize--;
 
     /*
 	if (index >= size) return;
@@ -94,12 +96,11 @@ void LeafNode::remove(int index) {
 // Insert into empty spot
 void LeafNode::insert(int key, void *value) {
 
-    int index = 0;
-    while (storage[index].valid) index++;
-    storage[index].key = key;
-    storage[index].ptr = value;
-    storage[index].valid = true;
+    storage[size].key = key;
+    storage[size].ptr = value;
+    storage[size].valid = true;
     size++;
+    vsize++;
 
     if (getKey() > key) {
         setKey(key);
@@ -134,6 +135,14 @@ void LeafNode::split(LeafNode *a, LeafNode *b) {
 
 void LeafNode::sort() {
     std::sort(storage, storage+size, [](const kvStore &v1, const kvStore &v2) -> bool {
-        return v1.key > v2.key;
+        return v1.valid && v2.valid && v1.key > v2.key;
     });
+}
+
+int LeafNode::getValidSize() {
+    return vsize;
+}
+
+bool LeafNode::getValid(int index) {
+    return storage[index].valid;
 }

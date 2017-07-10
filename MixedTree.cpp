@@ -30,9 +30,22 @@ void MixedTree::merge(Node *left, Node *right) {
     LeafNode *l = static_cast<LeafNode*>(left);
     LeafNode *r = static_cast<LeafNode*>(right);
     // check if merge is possible
-    if (l->getSize() + r->getSize() > FANOUT/2 + FANOUT%2) return;
+    if (l->getValidSize() + r->getValidSize() > FANOUT) return;
+    // creating new node and copying valid values into it
     LeafNode *node = new LeafNode();
-    
+    for (int i = 0; i < l->getTotalSize(); i++)
+        if (l->getValid(i))
+            node->insert(l->getLeafKey(i), l->getPtr(i));
+    for (int i = 0; i < r->getTotalSize(); i++)
+        if (r->getValid(i))
+            node->insert(r->getLeafKey(i), r->getPtr(i));
+    // assigning parent-child pointers
+    Node *parent = l->getParent()->getParent();
+    node->setParent(parent);
+    if (parent->getKey()>=node->getKey())
+        parent->setRight(node);
+    else
+        parent->setLeft(node);
 }
 
 LeafNode *MixedTree::searchLeafNode(int key) {
@@ -53,7 +66,6 @@ void MixedTree::insert(int key, void *value) {
 void MixedTree::remove(int key) {
     LeafNode *node = searchLeafNode(key);
     node->remove(node->getIndex(key));
-    // TODO: merge if empty
     if (node->getParent()->getLeft()->isLeaf() &&
             node->getParent()->getRight()->isLeaf()) {
         merge(node->getParent()->getLeft(), node->getParent()->getRight());

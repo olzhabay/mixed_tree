@@ -20,19 +20,22 @@ class LeafNode : public Node
     };
 
 private:
-    int32_t size ; // number of keys in this node
     kvStore storage[FANOUT];
     //int32_t leafKey[FANOUT]; // the values in this node
     //void *ptr[FANOUT]; // pointers to data
     LeafNode *prev;
     LeafNode *next;
+    uint16_t size; // number of all keys in this node
+    uint16_t vsize; // number of valid keys
 
 public:
     LeafNode();
     ~LeafNode();
-    int getSize();
+    int getTotalSize();
+    int getValidSize();
     int getLeafKey(int index);
     void *getPtr(int index);
+    bool getValid(int index);
     LeafNode *getNextLeaf();
     LeafNode *getPrevLeaf();
     int getIndex(void* value);
