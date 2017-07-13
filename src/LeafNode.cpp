@@ -124,10 +124,10 @@ void LeafNode::insert(int key, void *value) {
 
 void LeafNode::split(LeafNode *a, LeafNode *b) {
     sort();
-    for (int i = size/2; i >= 0; i--) {
+    for (int i = vsize/2; i >= 0; i--) {
         a->insert(storage[i].key, storage[i].ptr);
     }
-    for (int i = size-1; i > size/2; i--) {
+    for (int i = vsize-1; i > vsize/2; i--) {
         b->insert(storage[i].key, storage[i].ptr);
     }
 

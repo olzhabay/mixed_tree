@@ -42,7 +42,7 @@ void MixedTree::merge(Node *left, Node *right) {
     // assigning parent-child pointers
     Node *parent = l->getParent()->getParent();
     node->setParent(parent);
-    if (parent->getKey()>=node->getKey())
+    if (parent->getKey()<node->getKey())
         parent->setRight(node);
     else
         parent->setLeft(node);
